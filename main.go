@@ -129,6 +129,6 @@ func main() {
 		c.Data(http.StatusOK, "text/html; charset=utf-8", indexHTML)
 	})
 
-	fmt.Printf("Github：https://github.com/eooce/webssh\n")
+	fmt.Printf("Github：https://github.com/Edward0807/webssh\n")
 	server.Run(fmt.Sprintf(":%d", *port))
 }
