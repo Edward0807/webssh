@@ -1,7 +1,7 @@
 #!/bin/bash
 export PORT=${PORT:-''}      # web端口，留空默认8888
-export USER=${USER:-''}      # 登录用户名，可为空
-export PASS=${PASS:-''}      # 登录密码，可为空
+export USER=${USER:-'edward'}      # 登录用户名，可为空
+export PASS=${PASS:-'edward'}      # 登录密码，可为空
 
 ARCH=$(uname -m)
 FILE_NAME="webssh"
