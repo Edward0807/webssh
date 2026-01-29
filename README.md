@@ -32,7 +32,7 @@ docker run -d \
   -e PASS=yourpass     # 可选，Web登录密码（需与USER同时设置）
   -e PORT=8888         # 可选，服务端口，默认8888
   --name webssh \
-  eooce/webssh:latest
+  edward0807/webssh:latest
 ```
 
 ### 2. Docker Compose 部署
@@ -43,7 +43,7 @@ docker run -d \
 version: '3'
 services:
   webssh:
-    image: eooce/webssh:latest
+    image: edward0807/webssh:latest
     container_name: webssh
     ports:
       - "8888:8888"
