@@ -2,7 +2,7 @@
   "name": "webssh",
   "version": "1.0.0",
   "private": true,
-  "author": "eooce",
+  "author": "edward",
   "scripts": {
     "serve": "NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
     "build": "NODE_OPTIONS=--openssl-legacy-provider npx vue-cli-service build",
