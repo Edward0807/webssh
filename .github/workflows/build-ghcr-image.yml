@@ -27,7 +27,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+          
+      - name: Set lowercase repository owner
+        id: lowercase
+        run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -38,7 +42,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/edwardwebssh:latest
+            ghcr.io/${{ steps.lowercase.outputs.owner }}/edwardwebssh:latest
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.description=webssh proxy server
