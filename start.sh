@@ -18,7 +18,7 @@ else
     exit 1
 fi
 
-BASE_URL="https://github.com/Edward0807/webssh/releases/download"
+BASE_URL="https://github.com/Edward0807/webssh/releases/download/v1.0.0"
 FILE_URL="${BASE_URL}/webssh_linux_${ARCH}"
 
 # 如果文件不存在，则下载
