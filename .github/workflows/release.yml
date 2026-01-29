@@ -1,0 +1,133 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      release_notes:
+        description: 'Release notes'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Build for multiple platforms
+        env:
+          CGO_ENABLED: 0
+        run: |
+          # Create dist directory for binary files
+          mkdir -p dist
+          
+          # Build for different platforms
+          # The public directory is embedded into the binary using go:embed
+          echo "Building for linux/amd64..."
+          GOOS=linux GOARCH=amd64 go build -ldflags "-extldflags -static" -o dist/webssh_linux_amd64 main.go
+          
+          echo "Building for linux/arm64..."
+          GOOS=linux GOARCH=arm64 go build -ldflags "-extldflags -static" -o dist/webssh_linux_arm64 main.go
+          
+          echo "Building for linux/s390x..."
+          GOOS=linux GOARCH=s390x go build -ldflags "-extldflags -static" -o dist/webssh_linux_s390x main.go
+          
+          echo "Building for darwin/amd64..."
+          GOOS=darwin GOARCH=amd64 go build -ldflags "-extldflags -static" -o dist/webssh_darwin_amd64 main.go
+          
+          echo "Building for darwin/arm64..."
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-extldflags -static" -o dist/webssh_darwin_arm64 main.go
+          
+          echo "Building for windows/amd64..."
+          GOOS=windows GOARCH=amd64 go build -ldflags "-extldflags -static" -o dist/webssh_windows_amd64.exe main.go
+          
+          echo "Building for windows/arm64..."
+          GOOS=windows GOARCH=arm64 go build -ldflags "-extldflags -static" -o dist/webssh_windows_arm64.exe main.go
+          
+          echo "Building for freebsd/amd64..."
+          GOOS=freebsd GOARCH=amd64 go build -ldflags "-extldflags -static" -o dist/webssh_freebsd_amd64 main.go
+          
+          echo "Build completed successfully!"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: webssh-binaries
+          path: dist/
+          retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: webssh-binaries
+          path: dist/
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: webssh
+          generate_release_notes: false
+          body: |
+            ${{ github.event.inputs.release_notes }}
+            
+            ## Downloads
+            
+            ### Linux
+            - **AMD64**: `webssh_linux_amd64`
+            - **ARM64**: `webssh_linux_arm64`
+            - **S390X**: `webssh_linux_s390x`
+            
+            ### macOS
+            - **Intel**: `webssh_darwin_amd64`
+            - **M 系列**: `webssh_darwin_arm64`
+            
+            ### Windows
+            - **AMD64**: `webssh_windows_amd64.exe`
+            - **ARM64**: `webssh_windows_arm64.exe`
+            
+            ### FreeBSD
+            - **AMD64**: `webssh_freebsd_amd64`
+          draft: false
+          prerelease: false
+          files: |
+            dist/webssh_linux_amd64
+            dist/webssh_linux_arm64
+            dist/webssh_linux_s390x
+            dist/webssh_darwin_amd64
+            dist/webssh_darwin_arm64
+            dist/webssh_windows_amd64.exe
+            dist/webssh_windows_arm64.exe
+            dist/webssh_freebsd_amd64
